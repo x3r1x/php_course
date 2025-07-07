@@ -1,0 +1,203 @@
+<?php
+declare(strict_types=1);
+
+use JetBrains\PhpStorm\NoReturn;
+
+require_once __DIR__ . '/User.php';
+
+class UserController
+{
+    private const USER_REQUIRED_FIELDS = [
+        'first_name',
+        'last_name',
+        'gender',
+        'birth_date',
+        'email'
+    ];
+
+    function __construct(private PDO $dbConnection)
+    {
+    }
+
+    function index(): void
+    {
+        require_once __DIR__ . '/../View/register_form.php';
+    }
+
+    #[NoReturn] function registerUser(): void
+    {
+        $userData = self::getInputInformation();
+        self::validateRequiredFields($userData);
+        $validatedUserParams = self::normalizeUserData($userData);
+        $userId = $this->saveUserToDatabase($validatedUserParams);
+        header("Location: /user/" . $userId);
+        exit();
+    }
+
+    function showUser(int $userId) : void
+    {
+        $userData = self::findUserInDatabase($userId);
+
+        if (!$userData) {
+            http_response_code(404);
+            echo 'User not found';
+            return;
+        }
+
+        $user = new User(
+            id: (int)$userData['id'],
+            firstName: $userData['first_name'],
+            lastName: $userData['last_name'],
+            middleName: $userData['middle_name'] !== "" ? $userData['middle_name'] : null,
+            gender: $userData['gender'],
+            birthDate: $userData['birth_date'],
+            email: $userData['email'],
+            phone: $userData['phone'] !== "" ? $userData['phone'] : null,
+            avatarPath: $userData['avatar_path'] !== "" ? $userData['avatar_path'] : null
+        );
+
+        require_once __DIR__ . '/../View/user_page.php';
+    }
+
+    private function getInputInformation(): array
+    {
+        return [
+            'first_name' => $_POST['first_name'] ?? '',
+            'last_name' => $_POST['last_name'] ?? '',
+            'middle_name' => $_POST['middle_name'] ?? '',
+            'gender' => $_POST['gender'] ?? '',
+            'birth_date' => $_POST['birth_date'] ?? '',
+            'email' => $_POST['email'] ?? '',
+            'phone' => $_POST['phone'] ?? '',
+            'avatar_path' => self::getPath()
+        ];
+    }
+
+    private function getPath(): ?string
+    {
+        if (!isset($_FILES['avatar']) || $_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
+            return null;
+        }
+
+        $uploadsDir = __DIR__ . '/../../../assets/uploads/';
+        $filename = uniqid() . '_' . basename($_FILES['avatar']['name']);
+        $destination = $uploadsDir . $filename;
+
+        if (!move_uploaded_file($_FILES['avatar']['tmp_name'], $destination)) {
+            throw new RuntimeException('Save failed');
+        }
+
+        return '/uploads/' . $filename;
+    }
+
+    private function saveUserToDatabase(array $userParams): int
+    {
+        $sql_prompt = "INSERT INTO `user` 
+        (
+         `first_name`, 
+         `last_name`, 
+         `middle_name`, 
+         `gender`, 
+         `birth_date`, 
+         `email`, 
+         `phone`, 
+         `avatar_path`
+        )
+        VALUES 
+            (
+             :first_name, 
+             :last_name, 
+             :middle_name, 
+             :gender, 
+             :birth_date, 
+             :email, 
+             :phone, 
+             :avatar_path
+             )";
+
+        try {
+            $stmt = $this->dbConnection->prepare($sql_prompt);
+            $stmt->execute($userParams);
+            return (int)$this->dbConnection->lastInsertId();
+        } catch (PDOException $e) {
+            if (str_contains($e->getMessage(), 'Duplicate entry')) {
+
+                if (str_contains($e->getMessage(), 'email_idx')) {
+                    throw new InvalidArgumentException('Пользователь с таким email уже существует');
+                }
+                if (str_contains($e->getMessage(), 'phone_idx')) {
+                    throw new InvalidArgumentException('Пользователь с таким телефоном уже существует');
+                }
+            }
+            throw $e;
+        }
+    }
+
+    function findUserInDatabase(int $userId) : ?array
+    {
+        $sql_prompt = "SELECT 
+            `first_name`, 
+            `last_name`, 
+            `middle_name`, 
+            `gender`, 
+            `birth_date`, 
+            `email`, 
+            `phone`, 
+            `avatar_path`
+        FROM `user`
+        WHERE `user_id` = :user_id";
+
+        $stmt = $this->dbConnection->prepare($sql_prompt);
+        $stmt->execute([':user_id' => $userId]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($user) {
+            return $user;
+        }
+
+        return null;
+    }
+
+    private function validateRequiredFields(array $userParams): void
+    {
+        $missingFields = array_filter(self::USER_REQUIRED_FIELDS, fn($field) => empty($userParams[$field]));
+
+        if ($missingFields) {
+            throw new InvalidArgumentException(
+                'Required fields are not specified: ' . implode(', ', $missingFields)
+            );
+        }
+    }
+
+    private function normalizeUserData(array $userParams): array
+    {
+        return [
+            'first_name' => trim($userParams['first_name']),
+            'last_name' => trim($userParams['last_name']),
+            'middle_name' => isset($userParams['middle_name']) ? trim($userParams['middle_name']) : '',
+            'gender' => $userParams['gender'],
+            'birth_date' => $this->validateBirthDate($userParams['birth_date']),
+            'email' => strtolower(trim($userParams['email'])),
+            'phone' => isset($userParams['phone']) ? $this->validatePhone($userParams['phone']) : '',
+            'avatar_path' => $userParams['avatar_path'] ?? ''
+        ];
+    }
+
+    private function validateBirthDate($birthDate): string
+    {
+        if ($birthDate instanceof DateTime) {
+            return $birthDate->format('Y-m-d H:i:s');
+        }
+
+        try {
+            return (new DateTime($birthDate))->format('Y-m-d H:i:s');
+        } catch (Exception $e) {
+            throw new InvalidArgumentException('Invalid birth date: ' . $e->getMessage());
+        }
+    }
+
+    private function validatePhone(string $phone): string
+    {
+        return preg_replace('/[^0-9+]/', '', $phone);
+    }
+}
