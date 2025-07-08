@@ -2,7 +2,7 @@
 
 class User {
     function __construct(
-        private int $id,
+        private ?int $id,
         private string  $firstName,
         private string  $lastName,
         private ?string $middleName,
@@ -13,7 +13,7 @@ class User {
         private ?string $avatarPath
     ) {}
 
-    function getId(): int
+    function getId(): ?int
     {
         return $this->id;
     }
@@ -55,5 +55,19 @@ class User {
     function getAvatarPath(): ?string
     {
         return $this->avatarPath;
+    }
+
+    function convertInfoToArray(): array
+    {
+        return [
+            'first_name' => $this->firstName,
+            'last_name' => $this->lastName,
+            'middle_name' => $this->middleName,
+            'gender' => $this->gender,
+            'birth_date' => $this->birthDate,
+            'email' => $this->email,
+            'phone' => $this->phone,
+            'avatar_path' => $this->avatarPath
+        ];
     }
 }

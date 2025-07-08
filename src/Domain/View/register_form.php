@@ -71,16 +71,23 @@
             <script>
                 document.getElementById('avatarUpload').addEventListener('change', function (e) {
                     const file = e.target.files[0];
+                    const acceptableTypes = ['png'];
+
                     if (file) {
-                        const reader = new FileReader();
-                        reader.onload = function (event) {
-                            const preview = document.getElementById('avatarPreview');
-                            preview.innerHTML = '';
-                            const img = document.createElement('img');
-                            img.src = event.target.result;
-                            preview.appendChild(img);
+                        const extension = file.name.split('.').pop().toLowerCase();
+                        const isAcceptable = acceptableTypes.indexOf(extension) > -1;
+
+                        if (isAcceptable) {
+                            const reader = new FileReader();
+                            reader.onload = function (event) {
+                                const preview = document.getElementById('avatarPreview');
+                                preview.innerHTML = '';
+                                const img = document.createElement('img');
+                                img.src = event.target.result;
+                                preview.appendChild(img);
+                            }
+                            reader.readAsDataURL(file);
                         }
-                        reader.readAsDataURL(file);
                     }
                 });
 
