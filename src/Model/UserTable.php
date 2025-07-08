@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Model;
+namespace App\Model;
 
 use InvalidArgumentException;
 use PDO;
@@ -14,7 +14,7 @@ class UserTable
 
     function saveUserToDatabase(user $user): int
     {
-        $sql_prompt = "INSERT INTO `user` 
+        $sqlPrompt = "INSERT INTO `user` 
         (
          `first_name`, 
          `last_name`, 
@@ -38,8 +38,8 @@ class UserTable
              )";
 
         try {
-            $stmt = $this->dbConnection->prepare($sql_prompt);
-            $stmt->execute($user->convertInfoToArray());
+            $preparedPrompt = $this->dbConnection->prepare($sqlPrompt);
+            $preparedPrompt->execute($user->convertInfoToArray());
             return (int)$this->dbConnection->lastInsertId();
         } catch (PDOException $e) {
             if (str_contains($e->getMessage(), 'Duplicate entry')) {
@@ -57,7 +57,7 @@ class UserTable
 
     function findUserInDatabase(int $userId): ?array
     {
-        $sql_prompt = "SELECT 
+        $sqlPrompt = "SELECT 
             `first_name`, 
             `last_name`, 
             `middle_name`, 
@@ -69,9 +69,9 @@ class UserTable
         FROM `user`
         WHERE `user_id` = :user_id";
 
-        $stmt = $this->dbConnection->prepare($sql_prompt);
-        $stmt->execute([':user_id' => $userId]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        $preparedPrompt = $this->dbConnection->prepare($sqlPrompt);
+        $preparedPrompt->execute([':user_id' => $userId]);
+        $user = $preparedPrompt->fetch(PDO::FETCH_ASSOC);
 
         if ($user) {
             return $user;

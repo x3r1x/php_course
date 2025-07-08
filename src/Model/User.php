@@ -1,6 +1,7 @@
 <?php
 
-namespace App\Domain\Model;
+namespace App\Model;
+
 class User
 {
     function __construct(

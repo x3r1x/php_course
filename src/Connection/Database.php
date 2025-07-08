@@ -13,7 +13,7 @@ class Database {
 
     static function connectDatabase() : PDO
     {
-        if (self::$connection !== null) {
+        if (!is_null(self::$connection)) {
             return self::$connection;
         }
 

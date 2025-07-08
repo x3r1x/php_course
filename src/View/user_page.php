@@ -1,9 +1,9 @@
 <?php
 /**
- * @var User $user
+ * @var \App\Model\User $user
  */
 
-use App\Domain\Model\User;
+use App\Model\User;
 
 ?>
 
@@ -14,8 +14,8 @@ use App\Domain\Model\User;
         <title>Profile</title>
         <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
               rel="stylesheet">
-        <link rel="stylesheet" href="../../../assets/css/main.css">
-        <link rel="stylesheet" href="../../../assets/css/user_page.css">
+        <link rel="stylesheet" href="../../assets/css/main.css">
+        <link rel="stylesheet" href="../../assets/css/user_page.css">
     </head>
 
     <body>

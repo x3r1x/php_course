@@ -4,8 +4,8 @@
         <meta charset="UTF-8">
         <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
               rel="stylesheet">
-        <link rel="stylesheet" href="../../../assets/css/main.css">
-        <link rel="stylesheet" href="../../../assets/css/register_form.css">
+        <link rel="stylesheet" href="../../assets/css/main.css">
+        <link rel="stylesheet" href="../../assets/css/register_form.css">
     </head>
     <body>
         <h1>Регистрация</h1>
@@ -15,7 +15,7 @@
                     <div class="avatar-preview" id="avatarPreview">
                         <span>Фото</span>
                     </div>
-                    <input type="file" name="avatar" id="avatarUpload" accept="image/*" style="display: none;">
+                    <input type="file" accept="image/gif, image/png, image/jpeg" name="avatar" id="avatarUpload" style="display: none;">
                     <button type="button" onclick="document.getElementById('avatarUpload').click()">Выбрать фото</button>
                 </div>
 
@@ -74,20 +74,15 @@
                     const acceptableTypes = ['png'];
 
                     if (file) {
-                        const extension = file.name.split('.').pop().toLowerCase();
-                        const isAcceptable = acceptableTypes.indexOf(extension) > -1;
-
-                        if (isAcceptable) {
-                            const reader = new FileReader();
-                            reader.onload = function (event) {
-                                const preview = document.getElementById('avatarPreview');
-                                preview.innerHTML = '';
-                                const img = document.createElement('img');
-                                img.src = event.target.result;
-                                preview.appendChild(img);
-                            }
-                            reader.readAsDataURL(file);
+                        const reader = new FileReader();
+                        reader.onload = function (event) {
+                            const preview = document.getElementById('avatarPreview');
+                            preview.innerHTML = '';
+                            const img = document.createElement('img');
+                            img.src = event.target.result;
+                            preview.appendChild(img);
                         }
+                        reader.readAsDataURL(file);
                     }
                 });
 

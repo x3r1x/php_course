@@ -2,9 +2,9 @@
 declare(strict_types = 1);
 
 use App\Connection\Database;
-use App\Domain\Controller\UserController;
+use App\Controller\UserController;
 
-require_once __DIR__ . '/src/Domain/Controller/UserController.php';
+require_once __DIR__ . '/src/Controller/UserController.php';
 require_once __DIR__ . '/src/Connection/Database.php';
 
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -27,10 +27,11 @@ try {
             break;
         default:
             http_response_code(404);
-            echo "404 Not Found brr brr patapim";
+            echo "404 Not Found";
     }
 } catch (Exception $exception) {
     http_response_code(404);
     error_log("Error: " . $exception->getMessage());
     echo "Server error";
+    die();
 }

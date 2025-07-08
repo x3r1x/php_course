@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Domain\Controller;
+namespace App\Controller;
 
 use App\Connection\Database;
-use App\Domain\Model\User;
-use App\Domain\Model\UserTable;
+use App\Model\User;
+use App\Model\UserTable;
 use DateTime;
 use Exception;
 use InvalidArgumentException;
@@ -14,7 +14,7 @@ use RuntimeException;
 
 require_once __DIR__ . '/../Model/User.php';
 require_once __DIR__ . '/../Model/UserTable.php';
-require_once __DIR__ . '/../../Connection/Database.php';
+require_once __DIR__ . '/../Connection/Database.php';
 
 class UserController
 {
@@ -42,10 +42,10 @@ class UserController
         $validatedUserParams = self::normalizeUserData($userData);
 
         $user = new User(
-            id: null,
+            null,
             firstName: $validatedUserParams['first_name'],
             lastName: $validatedUserParams['last_name'],
-            middleName: $validatedUserParams['middle_name'] !== "" ? $validatedUserParams['middle_name'] : null,
+            middleName: empty($validatedUserParams['middle_name']) ? $validatedUserParams['middle_name'] : null,
             gender: $validatedUserParams['gender'],
             birthDate: $validatedUserParams['birth_date'],
             email: $validatedUserParams['email'],
@@ -105,7 +105,7 @@ class UserController
             return null;
         }
 
-        $uploadsDir = __DIR__ . '/../../../assets/uploads/';
+        $uploadsDir = __DIR__ . '/../../assets/uploads/';
         $filename = uniqid() . '_' . basename($_FILES['avatar']['name']);
         $destination = $uploadsDir . $filename;
 
