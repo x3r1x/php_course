@@ -1,12 +1,3 @@
-<?php
-/**
- * @var \App\Model\User $user
- */
-
-use App\Model\User;
-
-?>
-
 <!DOCTYPE html>
 <html lang="ru">
     <head>

@@ -12,10 +12,6 @@ use InvalidArgumentException;
 use JetBrains\PhpStorm\NoReturn;
 use RuntimeException;
 
-require_once __DIR__ . '/../Model/User.php';
-require_once __DIR__ . '/../Model/UserTable.php';
-require_once __DIR__ . '/../Connection/Database.php';
-
 class UserController
 {
     private const USER_REQUIRED_FIELDS = [
