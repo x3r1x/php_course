@@ -1,7 +1,16 @@
 <?php
 
-class UserTable {
-    function __construct(private PDO $dbConnection) {}
+namespace App\Domain\Model;
+
+use InvalidArgumentException;
+use PDO;
+use PDOException;
+
+class UserTable
+{
+    function __construct(private PDO $dbConnection)
+    {
+    }
 
     function saveUserToDatabase(user $user): int
     {
@@ -46,7 +55,7 @@ class UserTable {
         }
     }
 
-    function findUserInDatabase(int $userId) : ?array
+    function findUserInDatabase(int $userId): ?array
     {
         $sql_prompt = "SELECT 
             `first_name`, 

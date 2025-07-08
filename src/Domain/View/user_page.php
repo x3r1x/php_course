@@ -3,6 +3,8 @@
  * @var User $user
  */
 
+use App\Domain\Model\User;
+
 ?>
 
 <!DOCTYPE html>

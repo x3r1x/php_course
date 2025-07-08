@@ -2,8 +2,9 @@
 declare(strict_types = 1);
 
 use App\Connection\Database;
+use App\Domain\Controller\UserController;
 
-require_once __DIR__ . '/src/Domain/User/UserController.php';
+require_once __DIR__ . '/src/Domain/Controller/UserController.php';
 require_once __DIR__ . '/src/Connection/Database.php';
 
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);

@@ -1,11 +1,19 @@
 <?php
 declare(strict_types=1);
 
-use App\Connection\Database;
-use JetBrains\PhpStorm\NoReturn;
+namespace App\Domain\Controller;
 
-require_once __DIR__ . '/User.php';
-require_once __DIR__ . '/UserTable.php';
+use App\Connection\Database;
+use App\Domain\Model\User;
+use App\Domain\Model\UserTable;
+use DateTime;
+use Exception;
+use InvalidArgumentException;
+use JetBrains\PhpStorm\NoReturn;
+use RuntimeException;
+
+require_once __DIR__ . '/../Model/User.php';
+require_once __DIR__ . '/../Model/UserTable.php';
 require_once __DIR__ . '/../../Connection/Database.php';
 
 class UserController
@@ -41,7 +49,7 @@ class UserController
             gender: $validatedUserParams['gender'],
             birthDate: $validatedUserParams['birth_date'],
             email: $validatedUserParams['email'],
-            phone: $validatedUserParams['phone'] !== "" ? $validatedUserParams['middle_name'] : null,
+            phone: $validatedUserParams['phone'] !== "" ? $validatedUserParams['phone'] : null,
             avatarPath: $validatedUserParams['avatar_path'] !== "" ? $validatedUserParams['avatar_path'] : null
         );
 
@@ -51,7 +59,7 @@ class UserController
         exit();
     }
 
-    function showUser(int $userId) : void
+    function showUser(int $userId): void
     {
         $userTable = new UserTable(Database::connectDatabase());
         $userData = $userTable->findUserInDatabase($userId);

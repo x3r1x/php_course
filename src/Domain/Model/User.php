@@ -1,17 +1,21 @@
 <?php
 
-class User {
+namespace App\Domain\Model;
+class User
+{
     function __construct(
-        private ?int $id,
+        private ?int    $id,
         private string  $firstName,
         private string  $lastName,
         private ?string $middleName,
-        private string $gender,
-        private string $birthDate,
+        private string  $gender,
+        private string  $birthDate,
         private string  $email,
         private ?string $phone,
         private ?string $avatarPath
-    ) {}
+    )
+    {
+    }
 
     function getId(): ?int
     {
@@ -47,6 +51,7 @@ class User {
     {
         return $this->phone;
     }
+
     public function getEmail(): string
     {
         return $this->email;
