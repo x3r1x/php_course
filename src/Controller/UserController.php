@@ -104,6 +104,11 @@ class UserController
         $uploadsDir = __DIR__ . '/../../assets/uploads/';
         $filename = uniqid() . '_' . basename($_FILES['avatar']['name']);
         $destination = $uploadsDir . $filename;
+        $mime_extension = mime_content_type($destination);
+
+        if ($mime_extension !== "image/png" and $mime_extension !== "image/jpeg" and $mime_extension !== "image/gif") {
+            throw new InvalidArgumentException('Wrong file extension!');
+        }
 
         if (!move_uploaded_file($_FILES['avatar']['tmp_name'], $destination)) {
             throw new RuntimeException('Save failed');
