@@ -1,3 +1,11 @@
+<?php
+/**
+ * @var User $user
+ */
+
+echo is_null($user->getAvatarPath());
+?>
+
 <!DOCTYPE html>
 <html lang="ru">
     <head>
@@ -26,6 +34,8 @@
             <li><span>Телефон:</span> <span><?= htmlspecialchars($user->getPhone()) ?></span></li>
         </ul>
         <button onclick="window.location.href='/register'">Создать нового пользователя</button>
+        <button onclick="window.location.href='/user/<?= $user->getId() ?>/edit'">Изменить этого пользователя</button>
+        <button onclick="window.location.href='/user/<?= $user->getId() ?>/delete'">Удалить этого пользователя</button>
     </div>
 
     </body>

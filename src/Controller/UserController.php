@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Connection\Database;
+use App\Controller\PhotoController;
 use App\Model\User;
 use App\Model\UserTable;
 use DateTime;
@@ -14,6 +15,7 @@ use RuntimeException;
 
 class UserController
 {
+    private PhotoController $photoController;
     private const USER_REQUIRED_FIELDS = [
         'first_name',
         'last_name',
@@ -22,8 +24,9 @@ class UserController
         'email'
     ];
 
-    function __construct()
+    function __construct(private UserTable $userTable)
     {
+        $this->photoController = new PhotoController();
     }
 
     function index(): void
@@ -36,18 +39,9 @@ class UserController
         $userData = self::getInputInformation();
         self::validateRequiredFields($userData);
         $validatedUserParams = self::normalizeUserData($userData);
+        $validatedUserParams['id'] = null;
 
-        $user = new User(
-            null,
-            firstName: $validatedUserParams['first_name'],
-            lastName: $validatedUserParams['last_name'],
-            middleName: empty($validatedUserParams['middle_name']) ? $validatedUserParams['middle_name'] : null,
-            gender: $validatedUserParams['gender'],
-            birthDate: $validatedUserParams['birth_date'],
-            email: $validatedUserParams['email'],
-            phone: $validatedUserParams['phone'] !== "" ? $validatedUserParams['phone'] : null,
-            avatarPath: $validatedUserParams['avatar_path'] !== "" ? $validatedUserParams['avatar_path'] : null
-        );
+        $user = $this->userTable->convertArrayToUser($validatedUserParams);
 
         $userTable = new UserTable(Database::connectDatabase());
         $userId = $userTable->saveUserToDatabase($user);
@@ -55,10 +49,9 @@ class UserController
         exit();
     }
 
-    function showUser(int $userId): void
+    #[NoReturn] function showUser(int $userId): void
     {
-        $userTable = new UserTable(Database::connectDatabase());
-        $userData = $userTable->findUserInDatabase($userId);
+        $userData = $this->userTable->findUserInDatabase($userId);
 
         if (!$userData) {
             http_response_code(404);
@@ -81,6 +74,40 @@ class UserController
         require_once __DIR__ . '/../View/user_page.php';
     }
 
+    #[NoReturn] function deleteUser(int $userId): void
+    {
+        $this->userTable->deleteUserFromDatabase($userId);
+        header('Location: /register');
+        exit;
+    }
+
+    function showEditForm(int $userId): void
+    {
+        $userParams = $this->userTable->findUserInDatabase($userId);
+        $user = $this->userTable->convertArrayToUser($userParams);
+        include __DIR__ . "/../View/edit_form.php";
+    }
+
+    function editUser(int $userId, array $inputsData): void
+    {
+        $userParams = $this->userTable->findUserInDatabase($userId);
+        $user = $this->userTable->convertArrayToUser($userParams);
+
+        try {
+            $this->photoController->updateAvatar($user);
+            unset($inputsData['avatar']);
+            unset($inputsData['remove_avatar']);
+            $this->updateOtherFields($user, $inputsData);
+            $this->userTable->updateUserInDatabase($user);
+            header('Location: /user/' . $userId);
+        } catch (RuntimeException $e) {
+            $error = $e->getMessage();
+            include __DIR__ . '/../View/edit_form.php';
+        }
+
+        exit();
+    }
+
     private function getInputInformation(): array
     {
         return [
@@ -91,30 +118,17 @@ class UserController
             'birth_date' => $_POST['birth_date'] ?? '',
             'email' => $_POST['email'] ?? '',
             'phone' => $_POST['phone'] ?? '',
-            'avatar_path' => self::getPath()
+            'avatar_path' => $this->photoController->getAvatarPath()
         ];
     }
 
-    private function getPath(): ?string
+    private function updateOtherFields(User $user, array $inputsData): void
     {
-        if (!isset($_FILES['avatar']) || $_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
-            return null;
+        foreach ($inputsData as $field => $fieldData) {
+            $setter = 'set' . str_replace('_', '', ucwords($field));
+
+            $user->{$setter}($fieldData);
         }
-
-        $uploadsDir = __DIR__ . '/../../assets/uploads/';
-        $filename = uniqid() . '_' . basename($_FILES['avatar']['name']);
-        $destination = $uploadsDir . $filename;
-        $mime_extension = mime_content_type($destination);
-
-        if ($mime_extension !== "image/png" and $mime_extension !== "image/jpeg" and $mime_extension !== "image/gif") {
-            throw new InvalidArgumentException('Wrong file extension!');
-        }
-
-        if (!move_uploaded_file($_FILES['avatar']['tmp_name'], $destination)) {
-            throw new RuntimeException('Save failed');
-        }
-
-        return '/uploads/' . $filename;
     }
 
     private function validateRequiredFields(array $userParams): void

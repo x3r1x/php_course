@@ -5,10 +5,12 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 use App\Connection\Database;
 use App\Controller\UserController;
+use App\Model\UserTable;
 
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $dbConnection = Database::connectDatabase();
-$userController = new UserController($dbConnection);
+$userTable = new UserTable($dbConnection);
+$userController = new UserController($userTable);
 
 try {
     switch ($path) {
@@ -20,9 +22,22 @@ try {
             break;
         case '/register/save':
             $userController -> registerUser();
-        case (bool)preg_match('#^/user/(\d+)$#', $path, $matches):
-            $userId = (int)$matches[1];
+        case (bool)preg_match('#^/user/(\d+)$#', $path, $params):
+            $userId = (int)$params[1];
             $userController->showUser($userId);
+            break;
+        case (bool)preg_match('#^/user/(\d+)/delete$#', $path, $params):
+            $userId = (int)$params[1];
+            $userController->deleteUser($userId);
+            break;
+        case (bool)preg_match('#^/user/(\d+)/edit$#', $path, $params):
+            $userId = (int)$params[1];
+
+            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                $userController->showEditForm($userId);
+            } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $userController->editUser($userId, $_POST);
+            }
             break;
         default:
             http_response_code(404);

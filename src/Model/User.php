@@ -28,9 +28,19 @@ class User
         return $this->firstName;
     }
 
+    public function setFirstName(string $firstName): void
+    {
+        $this->firstName = $firstName;
+    }
+
     function getLastName(): string
     {
         return $this->lastName;
+    }
+
+    public function setLastName(string $lastName): void
+    {
+        $this->lastName = $lastName;
     }
 
     function getMiddleName(): ?string
@@ -38,9 +48,19 @@ class User
         return $this->middleName;
     }
 
+    public function setMiddleName(?string $middleName): void
+    {
+        $this->middleName = $middleName;
+    }
+
     function getGender(): string
     {
         return $this->gender;
+    }
+
+    public function setGender(string $gender): void
+    {
+        $this->gender = $gender;
     }
 
     function getBirthDate(): string
@@ -48,9 +68,19 @@ class User
         return $this->birthDate;
     }
 
+    public function setBirthDate(string $birthDate): void
+    {
+        $this->birthDate = $birthDate;
+    }
+
     public function getPhone(): ?string
     {
         return $this->phone;
+    }
+
+    public function setPhone(?string $phone): void
+    {
+        $this->phone = $phone;
     }
 
     public function getEmail(): string
@@ -58,9 +88,19 @@ class User
         return $this->email;
     }
 
+    public function setEmail(string $email): void
+    {
+        $this->email = $email;
+    }
+
     function getAvatarPath(): ?string
     {
         return $this->avatarPath;
+    }
+
+    function setAvatarPath(?string $newAvatarPath): void
+    {
+        $this->avatarPath = $newAvatarPath;
     }
 
     function convertInfoToArray(): array
