@@ -11,11 +11,13 @@ use DateTime;
 use Exception;
 use InvalidArgumentException;
 use JetBrains\PhpStorm\NoReturn;
+use PDO;
 use RuntimeException;
 
 class UserController
 {
     private PhotoController $photoController;
+    private UserTable $userTable;
     private const USER_REQUIRED_FIELDS = [
         'first_name',
         'last_name',
@@ -24,9 +26,11 @@ class UserController
         'email'
     ];
 
-    function __construct(private UserTable $userTable)
+    // -> $dbConnection, not table
+    function __construct(private PDO $dbConnection)
     {
         $this->photoController = new PhotoController();
+        $this->userTable = new UserTable($this->dbConnection);
     }
 
     function index(): void
@@ -42,9 +46,7 @@ class UserController
         $validatedUserParams['id'] = null;
 
         $user = $this->userTable->convertArrayToUser($validatedUserParams);
-
-        $userTable = new UserTable(Database::connectDatabase());
-        $userId = $userTable->saveUserToDatabase($user);
+        $userId = $this->userTable->saveUserToDatabase($user);
         header("Location: /user/" . $userId);
         exit();
     }
@@ -76,6 +78,10 @@ class UserController
 
     #[NoReturn] function deleteUser(int $userId): void
     {
+        if ($this->userTable->findUserInDatabase($userId) === null) {
+            throw new Exception("No such user found!");
+        }
+
         $this->userTable->deleteUserFromDatabase($userId);
         header('Location: /register');
         exit;
@@ -83,15 +89,13 @@ class UserController
 
     function showEditForm(int $userId): void
     {
-        $userParams = $this->userTable->findUserInDatabase($userId);
-        $user = $this->userTable->convertArrayToUser($userParams);
+        $user = $this->userTable->findUserInDatabase($userId);
         include __DIR__ . "/../View/edit_form.php";
     }
 
     function editUser(int $userId, array $inputsData): void
     {
-        $userParams = $this->userTable->findUserInDatabase($userId);
-        $user = $this->userTable->convertArrayToUser($userParams);
+        $user = $this->userTable->findUserInDatabase($userId);
 
         try {
             $this->photoController->updateAvatar($user);

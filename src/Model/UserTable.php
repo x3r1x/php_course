@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Model;
 
@@ -56,7 +57,7 @@ class UserTable
         }
     }
 
-    function findUserInDatabase(int $userId): ?array
+    function findUserInDatabase(int $userId): ?User
     {
         $sqlPrompt = "SELECT 
             `user_id`,
@@ -73,11 +74,11 @@ class UserTable
 
         $preparedPrompt = $this->dbConnection->prepare($sqlPrompt);
         $preparedPrompt->execute([':user_id' => $userId]);
-        $user = $preparedPrompt->fetch(PDO::FETCH_ASSOC);
+        $userData = $preparedPrompt->fetch(PDO::FETCH_ASSOC);
 
-        if ($user) {
-            $user['id'] = $userId;
-            return $user;
+        if ($userData) {
+            $userData['id'] = $userId;
+            return $this->convertArrayToUser($userData);
         }
 
         return null;

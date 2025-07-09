@@ -9,8 +9,7 @@ use App\Model\UserTable;
 
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $dbConnection = Database::connectDatabase();
-$userTable = new UserTable($dbConnection);
-$userController = new UserController($userTable);
+$userController = new UserController($dbConnection);
 
 try {
     switch ($path) {
