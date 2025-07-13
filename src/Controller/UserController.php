@@ -3,14 +3,13 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Controller\PhotoController;
-use App\Model\User;
-use App\Model\UserTable;
+use App\Entity\User;
+use App\Repository\UserRepository;
 use DateTime;
+use DateTimeImmutable;
 use Exception;
 use InvalidArgumentException;
 use JetBrains\PhpStorm\NoReturn;
-use PDO;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,7 +18,6 @@ use Symfony\Component\HttpFoundation\Response;
 class UserController extends AbstractController
 {
     private PhotoController $photoController;
-    private UserTable $userTable;
     private const USER_REQUIRED_FIELDS = [
         'first_name',
         'last_name',
@@ -28,10 +26,9 @@ class UserController extends AbstractController
         'email'
     ];
 
-    function __construct(private readonly PDO $dbConnection)
+    function __construct(private readonly UserRepository $userRepository)
     {
         $this->photoController = new PhotoController();
-        $this->userTable = new UserTable($this->dbConnection);
     }
 
     function goToRegister(): Response
@@ -51,14 +48,14 @@ class UserController extends AbstractController
         $validatedUserParams = self::normalizeUserData($userData);
         $validatedUserParams['id'] = null;
 
-        $user = $this->userTable->convertArrayToUser($validatedUserParams);
-        $userId = $this->userTable->saveUserToDatabase($user);
+        $user = $this->convertArrayToUser($validatedUserParams);
+        $userId = $this->userRepository->storeData($user);
         return $this->redirectToRoute('user_page', ['userId' => $userId]);
     }
 
     #[NoReturn] function showUser(int $userId): Response
     {
-        $user = $this->userTable->findUserInDatabase($userId);
+        $user = $this->userRepository->findUserById($userId);
 
         if (is_null($user)) {
             http_response_code(404);
@@ -71,17 +68,17 @@ class UserController extends AbstractController
 
     #[NoReturn] function deleteUser(int $userId): Response
     {
-        if ($this->userTable->findUserInDatabase($userId) === null) {
+        if ($this->userRepository->findUserById($userId) === null) {
             throw new Exception("No such user found!");
         }
 
-        $this->userTable->deleteUserFromDatabase($userId);
+        $this->userRepository->deleteUserById($userId);
         return $this->redirectToRoute('register');
     }
 
     function editUser(int $userId, Request $request): Response
     {
-        $user = $this->userTable->findUserInDatabase($userId);
+        $user = $this->userRepository->findUserById($userId);
 
         try {
             if ($request->isMethod('GET')) {
@@ -91,7 +88,7 @@ class UserController extends AbstractController
                 unset($_POST['avatar']);
                 unset($_POST['remove_avatar']);
                 $this->updateOtherFields($user, $_POST);
-                $this->userTable->updateUserInDatabase($user);
+                $this->userRepository->storeData($user);
                 return $this->redirectToRoute('user_page', ['userId' => $userId]);
             }
         } catch (RuntimeException $e) {
@@ -122,6 +119,10 @@ class UserController extends AbstractController
         foreach ($inputsData as $field => $fieldData) {
             $setter = 'set' . str_replace('_', '', ucwords($field));
 
+            if ($field === 'birth_date') {
+                $fieldData = $this->validateBirthDate($fieldData);
+            }
+
             $user->{$setter}($fieldData);
         }
     }
@@ -151,14 +152,25 @@ class UserController extends AbstractController
         ];
     }
 
-    private function validateBirthDate($birthDate): string
+    private function validateBirthDate($birthDate): DateTimeImmutable
     {
+        if ($birthDate instanceof DateTimeImmutable) {
+            return $birthDate;
+        }
+
         if ($birthDate instanceof DateTime) {
-            return $birthDate->format('Y-m-d H:i:s');
+            return DateTimeImmutable::createFromMutable($birthDate);
         }
 
         try {
-            return (new DateTime($birthDate))->format('Y-m-d H:i:s');
+            $date = DateTimeImmutable::createFromFormat('Y-m-d', (string)$birthDate);
+
+            if ($date === false) {
+                throw new InvalidArgumentException('Invalid date format');
+            }
+
+            return $date->setTime(0, 0, 0);
+
         } catch (Exception $e) {
             throw new InvalidArgumentException('Invalid birth date: ' . $e->getMessage());
         }
@@ -167,5 +179,20 @@ class UserController extends AbstractController
     private function validatePhone(string $phone): string
     {
         return preg_replace('/[^0-9+]/', '', $phone);
+    }
+
+    private function convertArrayToUser(array $userInfo): User
+    {
+        return new User(
+            (int)$userInfo['id'],
+            $userInfo['first_name'],
+            $userInfo['last_name'],
+            !empty($userInfo['middle_name']) ? $userInfo['middle_name'] : null,
+            $userInfo['gender'],
+            $userInfo['birth_date'],
+            $userInfo['email'],
+            !empty($userInfo['phone']) ? $userInfo['phone'] : null,
+            !empty($userInfo['avatar_path']) ? $userInfo['avatar_path'] : null
+        );
     }
 }

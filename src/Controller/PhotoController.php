@@ -3,8 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Model\User;
-use Exception;
+use App\Entity\User;
 use InvalidArgumentException;
 use RuntimeException;
 

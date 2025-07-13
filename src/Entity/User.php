@@ -1,7 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Model;
+namespace App\Entity;
+
+use DateTimeImmutable;
 
 class User
 {
@@ -11,7 +13,7 @@ class User
         private string  $lastName,
         private ?string $middleName,
         private string  $gender,
-        private string  $birthDate,
+        private DateTimeImmutable  $birthDate,
         private string  $email,
         private ?string $phone,
         private ?string $avatarPath
@@ -64,12 +66,12 @@ class User
         $this->gender = $gender;
     }
 
-    function getBirthDate(): string
+    function getBirthDate(): DateTimeImmutable
     {
         return $this->birthDate;
     }
 
-    public function setBirthDate(string $birthDate): void
+    public function setBirthDate(DateTimeImmutable $birthDate): void
     {
         $this->birthDate = $birthDate;
     }
