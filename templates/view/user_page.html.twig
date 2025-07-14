@@ -23,7 +23,7 @@
             <li><span>Телефон:</span> <span>{{ user.phone }}</span></li>
         </ul>
         <div class="button-group">
-            <button onclick="window.location.href='{{ path('register') }}'">Создать нового пользователя</button>
+            <button onclick="window.location.href='{{ path('list_of_users') }}'">Список пользователей</button>
             <button onclick="window.location.href='{{ path('user_edit', {'userId': user.id}) }}'">Изменить этого пользователя</button>
             <button onclick="window.location.href='{{ path('user_delete', {'userId': user.id}) }}'">Удалить этого пользователя</button>
         </div>

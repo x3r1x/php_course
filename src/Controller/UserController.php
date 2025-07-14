@@ -33,7 +33,7 @@ class UserController extends AbstractController
 
     function goToRegister(): Response
     {
-        return $this->redirectToRoute('register');
+        return $this->redirectToRoute('list_of_users');
     }
 
     function index(): Response
@@ -73,7 +73,7 @@ class UserController extends AbstractController
         }
 
         $this->userRepository->deleteUserById($userId);
-        return $this->redirectToRoute('register');
+        return $this->redirectToRoute('list_of_users');
     }
 
     function editUser(int $userId, Request $request): Response
