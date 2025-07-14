@@ -7,7 +7,7 @@ use DateTimeImmutable;
 
 class User
 {
-    function __construct(
+    public function __construct(
         private ?int    $id,
         private string  $firstName,
         private string  $lastName,
@@ -21,12 +21,12 @@ class User
     {
     }
 
-    function getId(): ?int
+    public function getId(): ?int
     {
         return $this->id;
     }
 
-    function getFirstName(): string
+    public function getFirstName(): string
     {
         return $this->firstName;
     }
@@ -36,7 +36,7 @@ class User
         $this->firstName = $firstName;
     }
 
-    function getLastName(): string
+    public function getLastName(): string
     {
         return $this->lastName;
     }
@@ -56,7 +56,7 @@ class User
         $this->middleName = $middleName;
     }
 
-    function getGender(): string
+    public function getGender(): string
     {
         return $this->gender;
     }
@@ -66,7 +66,7 @@ class User
         $this->gender = $gender;
     }
 
-    function getBirthDate(): DateTimeImmutable
+    public function getBirthDate(): DateTimeImmutable
     {
         return $this->birthDate;
     }
@@ -96,17 +96,17 @@ class User
         $this->email = $email;
     }
 
-    function getAvatarPath(): ?string
+    public function getAvatarPath(): ?string
     {
         return $this->avatarPath;
     }
 
-    function setAvatarPath(?string $newAvatarPath): void
+    public function setAvatarPath(?string $newAvatarPath): void
     {
         $this->avatarPath = $newAvatarPath;
     }
 
-    function convertInfoToArray(): array
+    public function convertInfoToArray(): array
     {
         return [
             'first_name' => $this->firstName,

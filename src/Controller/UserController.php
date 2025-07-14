@@ -26,22 +26,22 @@ class UserController extends AbstractController
         'email'
     ];
 
-    function __construct(private readonly UserRepository $userRepository)
+    public function __construct(private readonly UserRepository $userRepository)
     {
         $this->photoController = new PhotoController();
     }
 
-    function goToRegister(): Response
+    public function goToRegister(): Response
     {
         return $this->redirectToRoute('list_of_users');
     }
 
-    function index(): Response
+    public function index(): Response
     {
         return $this->render('view/register_form.html.twig');
     }
 
-    #[NoReturn] function registerUser(): Response
+    #[NoReturn] public function registerUser(): Response
     {
         $userData = self::getInputInformation();
         self::validateRequiredFields($userData);
@@ -53,7 +53,7 @@ class UserController extends AbstractController
         return $this->redirectToRoute('user_page', ['userId' => $userId]);
     }
 
-    #[NoReturn] function showUser(int $userId): Response
+    #[NoReturn] public function showUser(int $userId): Response
     {
         $user = $this->userRepository->findUserById($userId);
 
@@ -66,7 +66,7 @@ class UserController extends AbstractController
         return $this->render('view/user_page.html.twig', ['user' => $user]);
     }
 
-    #[NoReturn] function deleteUser(int $userId): Response
+    #[NoReturn] public function deleteUser(int $userId): Response
     {
         if ($this->userRepository->findUserById($userId) === null) {
             throw new Exception("No such user found!");
@@ -76,7 +76,7 @@ class UserController extends AbstractController
         return $this->redirectToRoute('list_of_users');
     }
 
-    function editUser(int $userId, Request $request): Response
+    public function editUser(int $userId, Request $request): Response
     {
         $user = $this->userRepository->findUserById($userId);
 
@@ -100,7 +100,7 @@ class UserController extends AbstractController
         return $this->redirectToRoute('view/register_form.html.twig');
     }
 
-    function listOfUsers(): Response
+    public function listOfUsers(): Response
     {
         try {
             $users = $this->userRepository->getAllUsers();

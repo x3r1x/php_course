@@ -8,7 +8,7 @@ use InvalidArgumentException;
 use RuntimeException;
 
 class PhotoController {
-    function getAvatarPath(): ?string
+    public function getAvatarPath(): ?string
     {
         if (!isset($_FILES['avatar']) || $_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
             return null;
@@ -27,7 +27,7 @@ class PhotoController {
         return '/uploads/' . $filename;
     }
 
-    function updateAvatar(User $user): void
+    public function updateAvatar(User $user): void
     {
         if (isset($data['remove_avatar']) && $data['remove_avatar'] === '1') {
             if ($user->getAvatarPath()) {
