@@ -100,6 +100,16 @@ class UserController extends AbstractController
         return $this->redirectToRoute('view/register_form.html.twig');
     }
 
+    function listOfUsers(): Response
+    {
+        try {
+            $users = $this->userRepository->getAllUsers();
+            return $this->render('view/list_of_users.html.twig', ['users' => $users]);
+        } catch (Exception $e) {
+            return new Response('Error: ' . $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
     private function getInputInformation(): array
     {
         return [

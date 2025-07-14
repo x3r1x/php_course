@@ -35,4 +35,9 @@ class UserRepository extends ServiceEntityRepository {
         $this->entityManager->remove($user);
         $this->entityManager->flush();
     }
+
+    function getAllUsers(): array
+    {
+        return $this->findBy([]);
+    }
 }
