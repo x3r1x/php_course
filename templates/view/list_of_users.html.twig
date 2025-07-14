@@ -1,4 +1,4 @@
-% extends 'base.html.twig' %}
+{% extends 'base.html.twig' %}
 
 {% block title %}Список пользователей{% endblock %}
 
@@ -22,7 +22,7 @@
             <ul class="user-list">
                 {% for user in users %}
                     <li class="user-item">
-                        <a href="{{ path('user_show', {'userId': user.id}) }}" class="user-name">
+                        <a href="{{ path('user_page', {'userId': user.id}) }}" class="user-name">
                             {{ user.lastName }} {{ user.firstName }} {{ user.middleName }}
                         </a>
                         <div class="actions">
@@ -34,7 +34,7 @@
             </ul>
         {% endif %}
         <div class="button-group">
-            <button onclick="window.location.href='{{ path('user_register') }}'">Зарегистрировать нового пользователя</button>
+            <button onclick="window.location.href='{{ path('register') }}'">Зарегистрировать нового пользователя</button>
         </div>
     </div>
 {% endblock %}
