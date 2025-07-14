@@ -16,7 +16,8 @@ class User
         private DateTimeImmutable  $birthDate,
         private string  $email,
         private ?string $phone,
-        private ?string $avatarPath
+        private ?string $avatarPath,
+        private string $password
     )
     {
     }
